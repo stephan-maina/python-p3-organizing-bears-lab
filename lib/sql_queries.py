@@ -1,28 +1,14 @@
-# sql_queries.py
+# test_setup.py
 
-SELECT_ALL_FEMALE_BEARS = """
-    SELECT
-       name,
-       age
-    FROM bears
-    WHERE sex='F'
-"""
+import pytest
+import sqlite3
 
-SELECT_ALL_BEAR_NAMES_ALPHABETICAL = """
-    SELECT 
-        name
-    FROM bears
-    ORDER BY name
-"""
+@pytest.fixture(scope="module")
+def conn():
+    conn = sqlite3.connect(":memory:")  # Create an in-memory SQLite database
+    yield conn
+    conn.close()
 
-SELECT_ALL_ALIVE_BEAR_NAMES_AND_AGES_YOUNGEST_TO_OLDEST = """
-    SELECT 
-       name,
-       age
-    FROM bears
-    WHERE alive=1
-    ORDER BY age
-"""
 
 SELECT_OLDEST_BEAR_NAME_AND_AGE = """
     SELECT 
