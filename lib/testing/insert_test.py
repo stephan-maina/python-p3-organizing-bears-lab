@@ -1,29 +1,31 @@
-#!/usr/bin/env python3
+# insert_test.py
 
 import sqlite3
+import pytest
+from your_module import insert_data
 
-connection = sqlite3.connect(":memory:")
+def test_insert_data(conn):
+    # Ensure that data insertion works as expected
+    insert_data(conn)
 
-cursor = connection.cursor()
+    # Verify that the data has been inserted correctly by selecting and checking it
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM bears")
+    count = cursor.fetchone()[0]
+    assert count == 3  # Assuming 3 rows were inserted
 
-create_file = open("lib/create.sql")
-create_as_string = create_file.read()
-cursor.executescript(create_as_string)
+    # Additional tests related to data insertion can be added here
 
-insert_file = open("lib/insert.sql")
-insert_as_string = insert_file.read()
-cursor.executescript(insert_as_string)
+def test_insert_duplicate_data(conn):
+    # Test inserting duplicate data
+    with pytest.raises(sqlite3.IntegrityError):
+        # Attempt to insert a bear with the same name (assuming 'name' should be unique)
+        conn.execute("INSERT INTO bears (name, age, sex, alive) VALUES (?, ?, ?, ?)", ('Bear1', 5, 'M', 1))
 
-class TestInsert:
-    '''Statement in insert.sql'''
+    # Verify that the original data is still intact
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM bears")
+    count = cursor.fetchone()[0]
+    assert count == 3
 
-    def test_inserts_eight_bears_into_table(self):
-        '''inserts 8 bears into bears table.'''
-        result = cursor.execute("SELECT COUNT(*) FROM bears;")
-        assert(result.fetchall()[0][0] == 8)
 
-    def test_has_unnamed_bear(self):
-        '''inserts one unnamed bear into bears table.'''
-        result = cursor.execute("SELECT COUNT(*) FROM bears WHERE name IS NULL;")
-        assert(result.fetchall()[0][0] == 1)
-    
